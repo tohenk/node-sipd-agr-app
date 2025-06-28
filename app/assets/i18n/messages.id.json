@@ -1,0 +1,62 @@
+[
+  [
+    "Registering IPC channels",
+    "Mendaftarkan kanal-kanal IPC"
+  ],
+  [
+    "Application initialization done",
+    "Inisialisasi aplikasi selesai"
+  ],
+  [
+    "Please wait, saving messages...",
+    "Tunggu, menyimpan transliterasi..."
+  ],
+  [
+    "Edit Configuration",
+    "Edit Konfigurasi"
+  ],
+  [
+    "Download Budgeting",
+    "Unduh Anggaran"
+  ],
+  [
+    "Download Reference",
+    "Unduh Referensi"
+  ],
+  [
+    "View Log",
+    "Lihat Log"
+  ],
+  [
+    "Information",
+    "Informasi"
+  ],
+  [
+    "Error",
+    "Kesalahan"
+  ],
+  [
+    "Yes",
+    "Ya"
+  ],
+  [
+    "No",
+    "Tidak"
+  ],
+  [
+    "Configuration %CONFIG% is not found!\nCreate it?",
+    "Konfigurasi %CONFIG% tidak ada!\nApakah dibuat?"
+  ],
+  [
+    "Please wait for previous task to be done!",
+    "Silahkan tunggu tugas sebelumnya agar selesai terlebih dahulu!"
+  ],
+  [
+    "SIPD Agr process done with status %CODE%!",
+    "Proses SIPD Agr selesai dengan status %CODE%!"
+  ],
+  [
+    "SIPD Agr process failed with %ERROR%!",
+    "Proses SIPD Agr gagal dengan %ERROR%!"
+  ]
+]

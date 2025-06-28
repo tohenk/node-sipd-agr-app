@@ -1,0 +1,48 @@
+{
+  "name": "@ntlab/sipd-agr-app",
+  "version": "1.0.0",
+  "description": "SIPD Agr budgeting downloader",
+  "productName": "SIPD Agr",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "package:32": "electron-forge package --arch=ia32",
+    "package:64": "electron-forge package --arch=x64",
+    "make": "electron-forge make",
+    "make:32": "electron-forge make --arch=ia32",
+    "make:64": "electron-forge make --arch=x64"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tohenk/node-sipd-agr-app.git"
+  },
+  "keywords": [
+    "sipd",
+    "agr",
+    "budgeting",
+    "excel"
+  ],
+  "author": "Toha <tohenk@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tohenk/node-sipd-agr-app/issues"
+  },
+  "homepage": "https://github.com/tohenk/node-sipd-agr-app#readme",
+  "dependencies": {
+    "@ntlab/ntlib": "^2.6.2",
+    "@ntlab/sipd-agr": "^3.2.0",
+    "@ntlab/work": "^2.3.0",
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
+    "@electron/rebuild": "^3.7.2",
+    "electron": "^22.3.27"
+  }
+}
