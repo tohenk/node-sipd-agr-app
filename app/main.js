@@ -89,7 +89,6 @@ class MainApp
             const filename = directory === 'windows' ? 'selenium-manager.exe' : 'selenium-manager';
             const seleniumManager = require.resolve(`selenium-webdriver/bin/${directory}/${filename}`);
             process.env.SE_MANAGER_PATH = this.getTranslatedPath(seleniumManager);
-            console.log(process.env.SE_MANAGER_PATH);
         }
     }
 

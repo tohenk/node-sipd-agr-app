@@ -42,7 +42,7 @@ module.exports = {
         {
             name: '@electron-forge/maker-squirrel',
             config: {
-                name: 'DPFB',
+                name: 'SIPD-Agr',
                 iconUrl: 'https://raw.githubusercontent.com/tohenk/node-sipd-agr-app/master/app/assets/icons/app.ico',
                 setupIcon: path.join(__dirname, 'assets', 'icons', 'app.ico'),
             }
