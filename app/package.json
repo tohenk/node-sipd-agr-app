@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/sipd-agr-app",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "SIPD Agr budgeting downloader",
   "productName": "SIPD Agr",
   "main": "main.js",
