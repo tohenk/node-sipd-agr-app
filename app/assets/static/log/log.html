@@ -27,23 +27,21 @@ if (log) {
         }
     }
     const getLogs = () => {
-        window.electronAPI.invoke('get-logs', data => {
+        electronAPI.invoke('get-logs', data => {
             if (data.logs) {
                 log.innerHTML = data.logs.join('\n');
                 focusTo();
             }
         });
     }
-    window.electronAPI.listen('log', message => {
+    electronAPI.listen('log', message => {
         if (log.innerHTML.length) {
             log.innerHTML += '\n';
         }
         log.innerHTML += message;
         focusTo();
     });
-    window.addEventListener('DOMContentLoaded', e => {
-        getLogs();
-    });
+    addEventListener('DOMContentLoaded', e => getLogs());
 }
 </script>
 </body>

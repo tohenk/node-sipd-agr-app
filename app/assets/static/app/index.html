@@ -5,48 +5,86 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
+:root {--default-color: #999; --light-color: #ccc; --body-bg-color: #fff; --border-size: 1px; --size-1: 0.5rem; --size-2: 0.75rem;}
 body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-main {display: flex; flex-direction: column; align-items: stretch; text-align: center; padding: 1rem;}
 a {text-decoration: none;}
+.d-flex {display: flex; flex-direction: column; align-items: stretch; text-align: center; padding: 0;}
+.row {display: flex; flex-direction: row; align-items: center; padding: 0;}
 .w-100 {width: 100% !important;}
 .h-100 {height: 100% !important;}
-.m-0 {margin: 0;}
-.p-0 {padding: 0;}
-.mb-1 {margin-bottom: 0.75rem;}
-.btn {padding: 0.25rem 0.5rem; border: 1px solid #999; border-radius: 0.5rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;}
+.m-0 {margin: 0 !important;}
+.m-1 {margin: var(--size-1) !important;}
+.m-2 {margin: var(--size-2) !important;}
+.p-0 {padding: 0 !important;}
+.p-1 {padding: var(--size-1) !important;}
+.p-2 {padding: var(--size-2) !important;}
+.ms-1 {margin-left: var(--size-1);}
+.ms-2 {margin-left: var(--size-2);}
+.me-1 {margin-right: var(--size-1);}
+.me-2 {margin-right: var(--size-2);}
+.mt-1 {margin-top: var(--size-1);}
+.mt-2 {margin-top: var(--size-2);}
+.mb-1 {margin-bottom: var(--size-1);}
+.mb-2 {margin-bottom: var(--size-2);}
+.btn {color: var(--btn-text-color); border: var(--border-size) solid var(--btn-border-color); background-color: var(--btn-bg-color); border-radius: 0.5rem; padding: 0.5rem; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;}
+.btn:hover {background-color: var(--btn-hover-color);}
+.btn-default {--btn-text-color: #000; --btn-border-color: var(--default-color); --btn-bg-color: #fff; --btn-hover-color: #fff;}
+.btn-primary {--btn-text-color: #fff; --btn-border-color: #0d6efd; --btn-bg-color: #0d6efd; --btn-hover-color: #0b5ed7;}
+.btn-success {--btn-text-color: #fff; --btn-border-color: #198754; --btn-bg-color: #198754; --btn-hover-color: #157347;}
+.btn-danger {--btn-text-color: #fff; --btn-border-color: #dc3545; --btn-bg-color: #dc3545; --btn-hover-color: #bb2d3b;}
+.divider {line-height: 0.1rem; border-bottom: var(--border-size) solid var(--light-color);}
+.divider span {background-color: var(--body-bg-color); padding: 0 var(--size-1);}
+.flex-fill {flex: 1 1 auto !important;}
 </style>
 </head>
 <body>
-<main>
-  <a href="#" class="btn btn-config mb-1" role="button" data-translate="true">Edit Configuration</a>
-  <a href="#" class="btn btn-agr mb-1" role="button" data-translate="true">Download Budgeting</a>
-  <a href="#" class="btn btn-ref mb-1" role="button" data-translate="true">Download Reference</a>
-  <a href="#" class="btn btn-log" role="button" data-translate="true">View Log</a>
+<main class="d-flex p-2">
+  <h4 class="divider"><span data-translate="true">Configuration</span></h4>
+  <a href="#" class="btn btn-primary btn-config" role="button" title="Edit configuration such as passing the credential" data-translate="true">Edit</a>
+  <h4 class="divider"><span data-translate="true">Download</span></h4>
+  <div class="row">
+    <a href="#" class="btn btn-success btn-agr flex-fill me-1" role="button" title="Run budgeting download" data-translate="true">Budgeting</a>
+    <a href="#" class="btn btn-danger btn-ref flex-fill ms-1" role="button" title="Run reference download" data-translate="true">Reference</a>
+  </div>
+  <h4 class="divider"><span data-translate="true">Misc</span></h4>
+  <div class="d-flex">
+    <a href="#" class="btn btn-default btn-log flex-fill" role="button" title="View task logs" data-translate="true">View Log</a>
+    <div class="row p-1">
+      <div class="checkbox flex-fill">
+        <input type="checkbox" id="env-clean" data-env-key="clean"/>
+        <label for="env-clean" title="Clean profile on task run" data-translate="true">Clean</label>
+      </div>
+      <div class="checkbox flex-fill">
+        <input type="checkbox" id="env-zip" data-env-key="zip"/>
+        <label for="env-zip" title="Zip result when done" data-translate="true">Zip</label>
+      </div>
+    </div>
+  </div>
 </main>
 <script>
     const config = document.querySelector('.btn-config');
     if (config) {
         config.addEventListener('click', e => {
-            window.electronAPI.invoke('edit-config');
+            electronAPI.invoke('edit-config');
         });
     }
     const agr = document.querySelector('.btn-agr');
     if (agr) {
         agr.addEventListener('click', e => {
-            window.electronAPI.invoke('agr', {mode: 'agr'});
+            electronAPI.invoke('agr', {mode: 'agr'});
         });
     }
     const ref = document.querySelector('.btn-ref');
     if (ref) {
         ref.addEventListener('click', e => {
-            window.electronAPI.invoke('agr', {mode: 'ref'});
+            electronAPI.invoke('agr', {mode: 'ref'});
         });
     }
     const log = document.querySelector('.btn-log');
     if (log) {
         log.addEventListener('click', e => {
             e.preventDefault();
-            window.electronAPI.invoke('open-log');
+            electronAPI.invoke('open-log');
         });
     }
 </script>

@@ -57,25 +57,31 @@ class MainApp
             console.log('Reading configuration %s', filename);
             this.config = JSON.parse(fs.readFileSync(filename));
         }
-        Object.assign(this.config, this.getConfigHandlers());
-        if (!this.config.rootdir) {
-            this.config.rootdir = __dirname;
+    }
+
+    applyDefaultConfig() {
+        for (const [k, v] of Object.entries(this.getDefaults())) {
+            if (this.config[k] === undefined) {
+                if (typeof v === 'function') {
+                    this.config[k] = v();
+                } else {
+                    this.config[k] = v;
+                }
+            }
         }
-        if (!this.config.workdir) {
-            this.config.workdir = process.cwd();
+    }
+
+    initializeEnv() {
+        const defaults = {
+            clean: true,
+            zip: true,
         }
-        this.config.staticdir = path.join(this.config.rootdir, 'assets', 'static');
-        this.config.i18ndir = path.join(this.config.rootdir, 'assets', 'i18n');
-        this.config.icondir = path.join(this.config.rootdir, 'assets', 'icons');
-        // check for default configuration
-        if (this.config.locale === undefined) {
-            this.config.locale = 'id';
+        this.envFile = this.getConfigFile('.env');
+        if (fs.existsSync(this.envFile)) {
+            this.env = JSON.parse(fs.readFileSync(this.envFile));
+        } else {
+            this.env = defaults;
         }
-        if (this.config.debug === undefined) {
-            this.config.debug = false;
-        }
-        // force save messages
-        this.config['save-messages'] = true;
     }
 
     initializeWebdriver() {
@@ -99,19 +105,64 @@ class MainApp
         ipcMain.handle('translate', (event, data) => {
             return this.getMessages(data);
         });
+        ipcMain.handle('env', (event, data) => {
+            if (Array.isArray(data)) {
+                const res = {};
+                for (const env of data) {
+                    if (this.env[env] !== undefined) {
+                        res[env] = this.env[env];
+                    }
+                }
+                return res;
+            } else if (data.set && data.value !== undefined && data.value !== null) {
+                let res = false;
+                const env = data.set;
+                if (this.env[env] !== undefined && this.env[env] !== data.value) {
+                    this.env[env] = data.value;
+                    fs.writeFileSync(this.envFile, JSON.stringify(this.env));
+                }
+                return res;
+            }
+        });
     }
 
-    getConfigHandlers() {
+    getDefaults() {
         return {
+            rootdir: __dirname,
+            workdir: process.cwd(),
+            staticdir: () => this.getAssetDir('static'),
+            i18ndir: () => this.getAssetDir('i18n'),
+            icondir: () => this.getAssetDir('icons'),
+            outdir: () => path.join(app.getPath('documents'), 'sipd-agr'),
+            locale: 'id',
+            debug: false,
+            'save-messages': true,
         }
     }
 
-    getStatic(...names) {
-        return path.join(this.config.staticdir, ...names);
+    getAssetDir(...dirs) {
+        return path.join(this.config.rootdir, 'assets', ...dirs);
     }
 
-    getConfigFile(...names) {
-        return path.join(this.config.workdir, ...names);
+    getStatic(...files) {
+        return path.join(this.config.staticdir, ...files);
+    }
+
+    getConfigFile(...files) {
+        return path.join(this.config.workdir, ...files);
+    }
+
+    getAgrConfFile(file) {
+        let res;
+        if (fs.existsSync(file)) {
+            res = this.getConfigFile('.agr');
+            const conf = JSON.parse(fs.readFileSync(file));
+            fs.writeFileSync(res, JSON.stringify(Object.assign(conf, {
+                autoClose: true,
+                workdir: this.config.outdir,
+            })));
+        }
+        return res;
     }
 
     getTranslatedPath(path) {
@@ -178,6 +229,16 @@ class MainApp
         }
     }
 
+    addLog(log) {
+        const lines = log.toString()
+            .split('\n')
+            .filter(a => a.length);
+        this.logs.push(...lines);
+        for (const line of lines) {
+            this.notify('log', line);
+        }
+    }
+
     getCommonPreferences() {
         return {
             webPreferences: {
@@ -203,7 +264,10 @@ class MainApp
     createWin(options, fileOrUrl = null) {
         const w = new BrowserWindow(Object.assign({}, options, this.getCommonPreferences()));
         w.webContents.on('dom-ready', () => {
-            w.webContents.executeJavaScript('electronAPI.translate();');
+            w.webContents.executeJavaScript(`
+electronAPI.translate();
+electronAPI.configure();
+            `);
         });
         if (fileOrUrl) {
             if (fileOrUrl.match(/^http(s)?\:\/\/(.*)$/)) {
@@ -217,7 +281,7 @@ class MainApp
 
     createWindow() {
         return new Promise((resolve, reject) => {
-            this.win = this.createWin({width: 400, height: 250, center: true, maximizable: false},
+            this.win = this.createWin({title: `${app.getName()} v${app.getVersion()}`, width: 500, height: 375, center: true, maximizable: false},
                 this.getStatic('app', 'index.html'));
             const baseOptions = {parent: this.win, modal: true, minimizable: false, maximizable: false};
             this.splash = this.createWin(Object.assign({width: 500, height: 300, frame: false}, baseOptions),
@@ -246,9 +310,7 @@ class MainApp
         .then(() => {
             console.log(`App ${app.getName()} is ready...`);
             this.ready = true;
-            BrowserWindow.getAllWindows().forEach(win => {
-                win.webContents.send('ready', {ready: true});
-            });
+            this.notify('ready', {ready: true});
         })
         .catch(err => {
             this.showError(err);
@@ -288,6 +350,8 @@ class MainApp
     
     run() {
         this.initializeConfig();
+        this.applyDefaultConfig();
+        this.initializeEnv();
         this.initializeWebdriver();
         this.InitializeCoreIpc();
         this.handleEvents();

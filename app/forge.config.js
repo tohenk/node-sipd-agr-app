@@ -35,7 +35,7 @@ module.exports = {
             ].join(',') + '}'
         },
         icon: 'assets/icons/app',
-        ignore: ['^/agr/', '^/profile/', '^/refs/']
+        ignore: ['^/.agr', '^/.env', '^/agr.json', '^/agr/', '^/profile/', '^/refs/']
     },
     rebuildConfig: {},
     makers: [

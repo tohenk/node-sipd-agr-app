@@ -43,17 +43,9 @@ class App {
         }
     }
 
-    addLog(message) {
-        if (this.parent) {
-            this.parent.logs.push(message);
-            if (this.parent.win) {
-                this.parent.win.webContents.send('log', message);
-            }
-        }
-    }
-
     connectIpc() {
         return new Promise((resolve, reject) => {
+            this.ipcs = {};
             const dir = path.join(__dirname, 'ipc');
             const files = fs.readdirSync(dir);
             files.forEach(file => {
@@ -61,25 +53,35 @@ class App {
                     const channel = file.substring(0, file.length - 3);
                     const IpcClass = require(path.join(dir, channel));
                     const ipc = new IpcClass({parent: this.parent});
+                    this.ipcs[channel] = ipc;
                     ipcMain.handle(channel, async (event, data) => {
-                        if (ipc.webContents !== event.sender) {
-                            ipc.webContents = event.sender;
+                        ipc.execute = async (data, webContents) => {
+                            if (ipc.webContents !== webContents) {
+                                ipc.webContents = webContents;
+                            }
+                            const res = {success: false};
+                            try {
+                                await ipc.handle(data, res);
+                                res.success = true;
+                                debug(`IPC ${channel} done with ${Stringify.from(res)}`);
+                            }
+                            catch (err) {
+                                console.error(err);
+                                res.error = err;
+                                debug(`IPC ${channel} failed with ${err}`);
+                            }
+                            return res;
                         }
-                        const res = {success: false};
-                        try {
-                            await ipc.handle(data, res);
-                            res.success = true;
-                            debug(`IPC ${channel} done with ${Stringify.from(res)}`);
-                        }
-                        catch (err) {
-                            console.error(err);
-                            res.error = err;
-                            debug(`IPC ${channel} failed with ${err}`);
-                        }
-                        return res;
+                        return await ipc.execute(data, event.sender);
                     });
                 }
             });
+            this.parent.executeIpc = async (channel, data, webContents) => {
+                if (!this.ipcs[channel]) {
+                    throw new Error(this.parent.translate('IPC channel %IPC% not available!', {IPC: channel}));
+                }
+                return await this.ipcs[channel].execute(data, webContents);
+            }
             resolve();
         });
     }
@@ -98,7 +100,7 @@ class App {
             if (typeof work == 'function') {
                 title = this.parent.translate(title);
                 this.splashMessage(title);
-                this.addLog(`Init: ${title}...`);
+                this.parent.addLog(`Init: ${title}...`);
                 console.log('Init: %s...', title);
                 work.apply(this)
                     .then(() => resolve())

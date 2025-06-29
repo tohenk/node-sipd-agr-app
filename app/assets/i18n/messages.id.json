@@ -1,5 +1,9 @@
 [
   [
+    "%APP% already running!",
+    "%APP% sedang dijalankan!"
+  ],
+  [
     "Registering IPC channels",
     "Mendaftarkan kanal-kanal IPC"
   ],
@@ -12,20 +16,64 @@
     "Tunggu, menyimpan transliterasi..."
   ],
   [
-    "Edit Configuration",
-    "Edit Konfigurasi"
+    "Configuration",
+    "Konfigurasi"
   ],
   [
-    "Download Budgeting",
-    "Unduh Anggaran"
+    "Download",
+    "Unduh"
   ],
   [
-    "Download Reference",
-    "Unduh Referensi"
+    "Misc",
+    "Lain-lain"
+  ],
+  [
+    "Edit",
+    "Ubah"
+  ],
+  [
+    "Budgeting",
+    "Anggaran"
+  ],
+  [
+    "Reference",
+    "Referensi"
+  ],
+  [
+    "Clean",
+    "Bersihkan"
+  ],
+  [
+    "Zip",
+    "Zip"
   ],
   [
     "View Log",
     "Lihat Log"
+  ],
+  [
+    "Edit configuration such as passing the credential",
+    "Ubah konfigurasi antara lain dengan menyediakan kredensial"
+  ],
+  [
+    "Run budgeting download",
+    "Jalankan unduh anggaran"
+  ],
+  [
+    "Run reference download",
+    "Jalankan unduh referensi"
+  ],
+  [
+    "View task logs",
+    "Lihat log tugas"
+  ],
+  [
+    "Clean profile on task run",
+    "Bersihkan profil saat menjalankan tugas"
+  ],
+  [
+    "Zip result when done",
+    "Jadikan Zip ketika selesai"
   ],
   [
     "Information",
@@ -58,5 +106,13 @@
   [
     "SIPD Agr process failed with %ERROR%!",
     "Proses SIPD Agr gagal dengan %ERROR%!"
+  ],
+  [
+    "SIPD Agr processing is done!",
+    "Proses SIPD Agr telah selesai!"
+  ],
+  [
+    "IPC channel %IPC% not available!",
+    "Kanal IPC %IPC% tidak tersedia!"
   ]
 ]

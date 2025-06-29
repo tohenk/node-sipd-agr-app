@@ -24,7 +24,12 @@
 
 const fs = require('fs');
 const IpcCore = require('./~core');
-const { dialog } = require('electron');
+const Work = require('@ntlab/work/work');
+const Queue = require('@ntlab/work/queue');
+const JSZip = require('jszip');
+const { dialog, shell } = require('electron');
+const { glob } = require('glob');
+const path = require('path');
 
 class Agr extends IpcCore {
 
@@ -32,7 +37,7 @@ class Agr extends IpcCore {
         const configFile = this.parent.getTranslatedPath(this.parent.getConfigFile('agr.json'));
         if (fs.existsSync(configFile)) {
             if (this.fork === undefined) {
-                this.run(configFile, this.getMode(data.mode));
+                this.run(this.parent.getAgrConfFile(configFile), this.getMode(data.mode));
             } else {
                 dialog.showMessageBoxSync({
                     title: this.parent.translate('Error'),
@@ -61,39 +66,44 @@ class Agr extends IpcCore {
         return mode;
     }
 
-    addLog(log) {
-        const lines = log.toString()
-            .split('\n')
-            .filter(a => a.length);
-        this.parent.logs.push(...lines);
-        for (const line of lines) {
-            this.parent.notify('log', line);
-        }
-    }
-
     run(config, mode) {
         const sipdAgr = require.resolve('@ntlab/sipd-agr');
         if (sipdAgr) {
             delete this.result;
             delete this.error;
+            const args = [`--config=${config}`, `--mode=${mode}`];
+            if (this.parent.env.clean) {
+                args.push('--clean');
+            }
+            if (this.parent.env.nodownload) {
+                args.push('--no-download');
+            }
             const fork = require('child_process').fork;
-            this.fork = fork(sipdAgr, [`--config=${config}`, `--mode=${mode}`], {
+            this.fork = fork(sipdAgr, args, {
                 stdio: ['pipe', 'pipe', 'pipe', 'ipc']
             });
             this.fork.stdout.on('data', line => {
-                this.addLog(line);
+                this.parent.addLog(line);
             });
             this.fork.stderr.on('data', line => {
-                this.addLog(line);
+                this.parent.addLog(line);
             });
             this.fork.on('exit', code => {
                 this.result = code;
-                delete this.fork;
-                dialog.showMessageBoxSync({
-                    title: this.parent.translate('Information'),
-                    message: this.parent.translate('SIPD Agr process done with status %CODE%!', {CODE: code}),
-                    type: 'info'
-                });
+                if (code === 0) {
+                    if (this.parent.env.zip) {
+                        this.zip(mode);
+                    } else {
+                        this.browseOutdir(this.parent.config.outdir);
+                    }
+                } else {
+                    delete this.fork;
+                    dialog.showMessageBoxSync({
+                        title: this.parent.translate('Information'),
+                        message: this.parent.translate('SIPD Agr process done with status %CODE%!', {CODE: code}),
+                        type: 'info'
+                    });
+                }
             });
             this.fork.on('error', err => {
                 this.error = err;
@@ -105,6 +115,107 @@ class Agr extends IpcCore {
                 });
             });
         }
+    }
+
+    zip(mode) {
+        let topdir, subdir = false;
+        switch (mode) {
+            case 'download':
+                topdir = path.join(this.parent.config.outdir, 'agr');
+                subdir = true;
+                break;
+            case 'refs':
+                topdir = path.join(this.parent.config.outdir, 'refs');
+                break;
+        }
+        if (fs.existsSync(topdir)) {
+            return Work.works([
+                [w => glob(path.join(topdir, '*'), {withFileTypes: true, windowsPathsNoEscape: true}), w => subdir],
+                [w => new Promise((resolve, reject) => {
+                    const dirs = [];
+                    if (subdir) {
+                        dirs.push(...w.getRes(0)
+                            .map(f => f.isDirectory() ? path.join(f.path, f.name) : null)
+                            .filter(Boolean)
+                            .sort());
+                    } else {
+                        dirs.push(topdir);
+                    }
+                    resolve(dirs);
+                })],
+                [w => new Promise((resolve, reject) => {
+                    const q = new Queue(w.getRes(1), dir => {
+                        this.zipDir(dir)
+                            .then(zipName => {
+                                this.parent.addLog(`Zip ${zipName} created...`);
+                                q.next();
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                q.next();
+                            });
+                    });
+                    q.once('done', () => resolve());
+                })],
+                [w => Promise.resolve(this.browseOutdir(topdir))],
+            ]);
+        } else {
+            Promise.resolve(this.browseOutdir(this.parent.config.outdir));
+        }
+    }
+
+    zipDir(dir) {
+        const zipName = path.join(dir, `${path.basename(dir)}.zip`);
+        const zip = new JSZip();
+        return Work.works([
+            [w => Promise.resolve(fs.renameSync(zipName, zipName + '~')), w => fs.existsSync(zipName)],
+            [w => glob(path.join(dir, '*.xlsx'), {withFileTypes: true, windowsPathsNoEscape: true})],
+            [w => new Promise((resolve, reject) => {
+                const q = new Queue(w.getRes(1), file => {
+                    const filename = path.join(file.path, file.name);
+                    if (fs.existsSync(filename)) {
+                        fs.readFile(filename, (err, data) => {
+                            if (!err) {
+                                zip.file(file.name, data);
+                            }
+                            q.next();
+                        });
+                    } else {
+                        q.next();
+                    }
+                });
+                q.once('done', () => {
+                    if (Object.keys(zip.files).length) {
+                        zip.generateAsync({
+                            type: 'nodebuffer',
+                            compression: 'DEFLATE',
+                            compressionOptions: {
+                                level: 9
+                            },
+                        })
+                        .then(stream => {
+                            fs.writeFileSync(zipName, stream);
+                            resolve(zipName);
+                        })
+                        .catch(err => reject(err));
+                    } else {
+                        resolve();
+                    }
+                });
+            })],
+        ]);
+    }
+
+    browseOutdir(dir) {
+        delete this.fork;
+        if (fs.existsSync(dir)) {
+            shell.openExternal(dir);
+        }
+        dialog.showMessageBox({
+            title: this.parent.translate('Information'),
+            message: this.parent.translate('SIPD Agr processing is done!'),
+            type: 'info'
+        });
     }
 }
 
