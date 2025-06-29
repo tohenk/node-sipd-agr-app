@@ -1,19 +1,23 @@
 name: Build releases
-
 on:
+  workflow_dispatch:
   push:
-    tags: [ "*" ]
-
+    tags: ["*"]
 jobs:
   build:
-
-    runs-on: windows-latest
-
     strategy:
       matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
         node-version: [22.x]
-        arch: [ia32, x64]
-
+        arch: [x64]
+        include:
+          - os: windows-latest
+            arch: ia32
+          - os: ubuntu-latest
+            arch: arm64
+          - os: macos-latest
+            arch: arm64
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -25,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: cd app && npm install --arch=${{ matrix.arch }}
     - name: Make release
-      run: cd app && npm run make:${{ matrix.arch == 'ia32' && '32' || '64' }}
+      run: cd app && npm run make:${{ matrix.arch == 'ia32' && '32' || (matrix.arch == 'arm64' && 'arm64' || '64') }}
     - name: Upload release
       uses: svenstaro/upload-release-action@v2
       with:

@@ -9,9 +9,11 @@
     "package": "electron-forge package",
     "package:32": "electron-forge package --arch=ia32",
     "package:64": "electron-forge package --arch=x64",
+    "package:arm64": "electron-forge package --arch=arm64",
     "make": "electron-forge make",
     "make:32": "electron-forge make --arch=ia32",
-    "make:64": "electron-forge make --arch=x64"
+    "make:64": "electron-forge make --arch=x64",
+    "make:arm64": "electron-forge make --arch=arm64"
   },
   "repository": {
     "type": "git",
