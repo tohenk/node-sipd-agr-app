@@ -87,6 +87,14 @@ a {text-decoration: none;}
             electronAPI.invoke('open-log');
         });
     }
+    addEventListener('DOMContentLoaded', e => {
+        const style = getComputedStyle(document.body);
+        electronAPI.invoke('size', {
+            center: true,
+            width: document.body.clientWidth + parseInt(style.marginLeft) + parseInt(style.marginRight),
+            height: document.body.clientHeight + parseInt(style.marginTop) + parseInt(style.marginBottom),
+        });
+    });
 </script>
 </body>
 </html>

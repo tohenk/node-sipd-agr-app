@@ -105,6 +105,15 @@ class MainApp
         ipcMain.handle('translate', (event, data) => {
             return this.getMessages(data);
         });
+        ipcMain.handle('size', (event, data) => {
+            const browser = BrowserWindow.fromWebContents(event.sender);
+            if (browser && data.width && data.height) {
+                browser.setContentSize(data.width, data.height);
+                if (data.center) {
+                    browser.center();
+                }
+            }
+        });
         ipcMain.handle('env', (event, data) => {
             if (Array.isArray(data)) {
                 const res = {};
