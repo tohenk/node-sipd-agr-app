@@ -29,7 +29,7 @@ const { dialog, shell } = require('electron');
 class EditConfig extends IpcCore {
 
     async handle(data, res) {
-        const configFile = this.parent.getTranslatedPath(this.parent.getConfigFile('agr.json'));
+        const configFile = this.parent.getAgrConf();
         if (fs.existsSync(configFile)) {
             shell.openExternal(configFile);
         } else {

@@ -22,17 +22,36 @@
  * SOFTWARE.
  */
 
+const fs = require('fs');
 const path = require('path');
 const Cmd = require('@ntlab/ntlib/cmd');
 
 Cmd.addBool('help', 'h', 'Show program usage').setAccessible(false);
 Cmd.addVar('config', '', 'Read app configuration from file', 'config-file');
 
-if (require('./squirrel-event') || !Cmd.parse() || (Cmd.get('help') && usage())) {
+const dotEnv = '.env';
+const confAgr = 'agr.json';
+
+let squirrel;
+if (require('./squirrel-event')(data => {squirrel = data}) || !Cmd.parse() || (Cmd.get('help') && usage())) {
+    if (squirrel) {
+        switch (squirrel.event) {
+            case 'uninstall':
+            case 'updated':
+            case 'obsolete':
+                const userDataDir = require('electron').app.getPath('userData');
+                [dotEnv, confAgr].forEach(file => {
+                    const filename = path.join(squirrel.app, file);
+                    if (fs.existsSync(filename)) {
+                        fs.copyFileSync(filename, path.join(userDataDir, file));
+                    }
+                });
+                break;
+        }
+    }
     process.exit();
 }
 
-const fs = require('fs');
 const Work = require('@ntlab/work/work');
 const { app, dialog, ipcMain, BrowserWindow, Menu } = require('electron');
 const debug = require('debug')('app:main');
@@ -42,6 +61,19 @@ class MainApp
     config = {}
     logs = []
     ready = false
+
+    initializeFirstRun() {
+        if (squirrel && squirrel.event === 'firstrun') {
+            const userDataDir = app.getPath('userData');
+            [dotEnv, confAgr].forEach(file => {
+                const filename = path.join(userDataDir, file);
+                if (fs.existsSync(filename)) {
+                    fs.copyFileSync(filename, path.join(squirrel.app, file));
+                    fs.unlinkSync(filename);
+                }
+            });
+        }
+    }
 
     initializeConfig() {
         let filename;
@@ -59,7 +91,7 @@ class MainApp
         }
     }
 
-    applyDefaultConfig() {
+    initializeDefaultConfig() {
         for (const [k, v] of Object.entries(this.getDefaults())) {
             if (this.config[k] === undefined) {
                 if (typeof v === 'function') {
@@ -76,7 +108,7 @@ class MainApp
             clean: true,
             zip: true,
         }
-        this.envFile = this.getConfigFile('.env');
+        this.envFile = this.getConfigFile(dotEnv);
         if (fs.existsSync(this.envFile)) {
             this.env = JSON.parse(fs.readFileSync(this.envFile));
         } else {
@@ -161,8 +193,13 @@ class MainApp
         return path.join(this.config.workdir, ...files);
     }
 
-    getAgrConfFile(file) {
+    getAgrConf() {
+        return this.getTranslatedPath(this.getConfigFile(confAgr));
+    }
+
+    getAgrConfRun() {
         let res;
+        const file = this.getAgrConf();
         if (fs.existsSync(file)) {
             res = this.getConfigFile('.agr');
             const conf = JSON.parse(fs.readFileSync(file));
@@ -358,8 +395,9 @@ electronAPI.configure();
     }
     
     run() {
+        this.initializeFirstRun();
         this.initializeConfig();
-        this.applyDefaultConfig();
+        this.initializeDefaultConfig();
         this.initializeEnv();
         this.initializeWebdriver();
         this.InitializeCoreIpc();

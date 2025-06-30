@@ -34,10 +34,10 @@ const path = require('path');
 class Agr extends IpcCore {
 
     async handle(data, res) {
-        const configFile = this.parent.getTranslatedPath(this.parent.getConfigFile('agr.json'));
+        const configFile = this.parent.getAgrConf();
         if (fs.existsSync(configFile)) {
             if (this.fork === undefined) {
-                this.run(this.parent.getAgrConfFile(configFile), this.getMode(data.mode));
+                this.run(this.parent.getAgrConfRun(), this.getMode(data.mode));
             } else {
                 dialog.showMessageBoxSync({
                     title: this.parent.translate('Error'),
