@@ -208,14 +208,14 @@ class Agr extends IpcCore {
 
     browseOutdir(dir) {
         delete this.fork;
-        if (fs.existsSync(dir)) {
-            shell.openExternal(dir);
-        }
-        dialog.showMessageBox({
+        dialog.showMessageBoxSync({
             title: this.parent.translate('Information'),
             message: this.parent.translate('SIPD Agr processing is done!'),
             type: 'info'
         });
+        if (fs.existsSync(dir)) {
+            shell.openExternal(dir);
+        }
     }
 }
 

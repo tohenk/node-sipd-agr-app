@@ -29,6 +29,7 @@ const Cmd = require('@ntlab/ntlib/cmd');
 Cmd.addBool('help', 'h', 'Show program usage').setAccessible(false);
 Cmd.addVar('config', '', 'Read app configuration from file', 'config-file');
 
+const configSave = false;
 const dotEnv = '.env';
 const confAgr = 'agr.json';
 
@@ -39,13 +40,15 @@ if (require('./squirrel-event')(data => {squirrel = data}) || !Cmd.parse() || (C
             case 'uninstall':
             case 'updated':
             case 'obsolete':
-                const userDataDir = require('electron').app.getPath('userData');
-                [dotEnv, confAgr].forEach(file => {
-                    const filename = path.join(squirrel.app, file);
-                    if (fs.existsSync(filename)) {
-                        fs.copyFileSync(filename, path.join(userDataDir, file));
-                    }
-                });
+                if (configSave) {
+                    const userDataDir = require('electron').app.getPath('userData');
+                    [dotEnv, confAgr].forEach(file => {
+                        const filename = path.join(squirrel.app, file);
+                        if (fs.existsSync(filename)) {
+                            fs.copyFileSync(filename, path.join(userDataDir, file));
+                        }
+                    });
+                }
                 break;
         }
     }
@@ -63,7 +66,7 @@ class MainApp
     ready = false
 
     initializeFirstRun() {
-        if (squirrel && squirrel.event === 'firstrun') {
+        if (squirrel && squirrel.event === 'firstrun' && configSave) {
             const userDataDir = app.getPath('userData');
             [dotEnv, confAgr].forEach(file => {
                 const filename = path.join(userDataDir, file);
@@ -175,6 +178,7 @@ class MainApp
             i18ndir: () => this.getAssetDir('i18n'),
             icondir: () => this.getAssetDir('icons'),
             outdir: () => path.join(app.getPath('documents'), 'sipd-agr'),
+            userdir: () => app.getPath('userData'),
             locale: 'id',
             debug: false,
             'save-messages': true,
@@ -190,7 +194,7 @@ class MainApp
     }
 
     getConfigFile(...files) {
-        return path.join(this.config.workdir, ...files);
+        return path.join(app.isPackaged ? this.config.userdir : this.config.workdir, ...files);
     }
 
     getAgrConf() {
