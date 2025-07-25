@@ -71,6 +71,7 @@ class Agr extends IpcCore {
         if (sipdAgr) {
             delete this.result;
             delete this.error;
+            const conf = JSON.parse(fs.readFileSync(config));
             const args = [`--config=${config}`, `--mode=${mode}`];
             if (this.parent.env.clean) {
                 args.push('--clean');
@@ -92,7 +93,7 @@ class Agr extends IpcCore {
                 this.result = code;
                 if (code === 0) {
                     if (this.parent.env.zip) {
-                        this.zip(mode);
+                        this.zip(mode, path.normalize(conf.dir));
                     } else {
                         this.browseOutdir(this.parent.config.outdir);
                     }
@@ -117,29 +118,20 @@ class Agr extends IpcCore {
         }
     }
 
-    zip(mode) {
-        let topdir, subdir = false;
-        switch (mode) {
-            case 'download':
-                topdir = path.join(this.parent.config.outdir, 'agr');
-                subdir = true;
-                break;
-            case 'refs':
-                topdir = path.join(this.parent.config.outdir, 'refs');
-                break;
-        }
-        if (fs.existsSync(topdir)) {
+    zip(mode, dir) {
+        if (fs.existsSync(dir)) {
+            const subdir = mode === 'download' ? true: false;
             return Work.works([
-                [w => glob(path.join(topdir, '*'), {withFileTypes: true, windowsPathsNoEscape: true}), w => subdir],
+                [w => glob(path.join(dir, '*'), {withFileTypes: true, windowsPathsNoEscape: true}), w => subdir],
                 [w => new Promise((resolve, reject) => {
                     const dirs = [];
                     if (subdir) {
                         dirs.push(...w.getRes(0)
-                            .map(f => f.isDirectory() ? path.join(f.path, f.name) : null)
+                            .map(f => f.isDirectory() ? path.join(dir, f.name) : null)
                             .filter(Boolean)
                             .sort());
                     } else {
-                        dirs.push(topdir);
+                        dirs.push(dir);
                     }
                     resolve(dirs);
                 })],
@@ -157,7 +149,7 @@ class Agr extends IpcCore {
                     });
                     q.once('done', () => resolve());
                 })],
-                [w => Promise.resolve(this.browseOutdir(topdir))],
+                [w => Promise.resolve(this.browseOutdir(dir))],
             ]);
         } else {
             Promise.resolve(this.browseOutdir(this.parent.config.outdir));
