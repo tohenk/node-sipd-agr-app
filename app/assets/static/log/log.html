@@ -21,7 +21,7 @@ const html = document.querySelector('html');
 const log = document.querySelector('.log');
 if (log) {
     const focusTo = () => {
-        const delta = log.clientHeight - html.clientHeight;
+        const delta = html.scrollHeight - html.clientHeight;
         if (delta > 0) {
             html.scrollTop = delta;
         }
