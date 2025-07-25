@@ -33,7 +33,7 @@
   "homepage": "https://github.com/tohenk/node-sipd-agr-app#readme",
   "dependencies": {
     "@ntlab/ntlib": "^2.6.2",
-    "@ntlab/sipd-agr": "^3.7.0",
+    "@ntlab/sipd-agr": "^3.8.0",
     "@ntlab/work": "^2.3.0",
     "glob": "^11.0.3",
     "jszip": "^3.10.1"

@@ -207,10 +207,13 @@ class MainApp
         if (fs.existsSync(file)) {
             res = this.getConfigFile('.agr');
             const conf = JSON.parse(fs.readFileSync(file));
-            fs.writeFileSync(res, JSON.stringify(Object.assign(conf, {
+            const year = conf.year || new Date().getFullYear();
+            fs.writeFileSync(res, JSON.stringify({
+                ...conf,
                 autoClose: true,
                 workdir: this.config.outdir,
-            })));
+                dir: path.join(this.config.outdir, year.toString(), path.sep),
+            }));
         }
         return res;
     }
@@ -312,7 +315,7 @@ class MainApp
     }
 
     createWin(options, fileOrUrl = null) {
-        const w = new BrowserWindow(Object.assign({}, options, this.getCommonPreferences()));
+        const w = new BrowserWindow({...options, ...this.getCommonPreferences()});
         w.webContents.on('dom-ready', () => {
             w.webContents.executeJavaScript(`
 electronAPI.translate();
@@ -334,7 +337,7 @@ electronAPI.configure();
             this.win = this.createWin({title: `${app.getName()} v${app.getVersion()}`, width: 500, height: 375, center: true, maximizable: false},
                 this.getStatic('app', 'index.html'));
             const baseOptions = {parent: this.win, modal: true, minimizable: false, maximizable: false};
-            this.splash = this.createWin(Object.assign({width: 500, height: 300, frame: false}, baseOptions),
+            this.splash = this.createWin({width: 500, height: 300, frame: false, ...baseOptions},
                 this.getStatic('splash', 'splash.html'));
             this.splash.webContents.on('dom-ready', () => resolve());
         });
