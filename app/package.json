@@ -33,18 +33,18 @@
   "homepage": "https://github.com/tohenk/node-sipd-agr-app#readme",
   "dependencies": {
     "@ntlab/ntlib": "^2.6.2",
-    "@ntlab/sipd-agr": "^3.8.0",
+    "@ntlab/sipd-agr": "^3.9.0",
     "@ntlab/work": "^2.3.0",
     "glob": "^11.0.3",
     "jszip": "^3.10.1"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.8.1",
-    "@electron-forge/maker-deb": "^7.8.1",
-    "@electron-forge/maker-rpm": "^7.8.1",
-    "@electron-forge/maker-squirrel": "^7.8.1",
-    "@electron-forge/maker-zip": "^7.8.1",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
+    "@electron-forge/cli": "^7.9.0",
+    "@electron-forge/maker-deb": "^7.9.0",
+    "@electron-forge/maker-rpm": "^7.9.0",
+    "@electron-forge/maker-squirrel": "^7.9.0",
+    "@electron-forge/maker-zip": "^7.9.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.9.0",
     "@electron/rebuild": "^3.7.2",
     "electron": "^22.3.27"
   }
