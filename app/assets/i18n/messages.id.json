@@ -114,5 +114,9 @@
   [
     "IPC channel %IPC% not available!",
     "Kanal IPC %IPC% tidak tersedia!"
+  ],
+  [
+    "Budgeting Year",
+    "Tahun Anggaran"
   ]
 ]

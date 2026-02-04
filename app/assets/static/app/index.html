@@ -35,6 +35,7 @@ a {text-decoration: none;}
 .divider {line-height: 0.1rem; border-bottom: var(--border-size) solid var(--light-color);}
 .divider span {background-color: var(--body-bg-color); padding: 0 var(--size-1);}
 .flex-fill {flex: 1 1 auto !important;}
+.justify-content-center {justify-content: center;}
 </style>
 </head>
 <body>
@@ -42,6 +43,10 @@ a {text-decoration: none;}
   <h4 class="divider"><span data-translate="true">Configuration</span></h4>
   <a href="#" class="btn btn-primary btn-config" role="button" title="Edit configuration such as passing the credential" data-translate="true">Edit</a>
   <h4 class="divider"><span data-translate="true">Download</span></h4>
+  <div class="row justify-content-center mb-2">
+    <label for="year" data-translate="true">Budgeting Year</label>
+    <select id="year" class="ms-2" data-env-key="year" aria-label="Budgeting year"></select>    
+  </div>
   <div class="row">
     <a href="#" class="btn btn-success btn-agr flex-fill me-1" role="button" title="Run budgeting download" data-translate="true">Budgeting</a>
     <a href="#" class="btn btn-danger btn-ref flex-fill ms-1" role="button" title="Run reference download" data-translate="true">Reference</a>
@@ -62,6 +67,19 @@ a {text-decoration: none;}
   </div>
 </main>
 <script>
+    const yr = document.querySelector('#year');
+    if (yr) {
+        const current = new Date().getFullYear();
+        for (i = current + 1; i >= 2024; i--) {
+            const opt = document.createElement('option');
+            opt.setAttribute('value', i);
+            opt.innerText = i;
+            if (i === current) {
+                opt.setAttribute('selected', true);
+            }
+            yr.appendChild(opt);
+        }
+    }
     const config = document.querySelector('.btn-config');
     if (config) {
         config.addEventListener('click', e => {

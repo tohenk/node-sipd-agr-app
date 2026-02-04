@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2025-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -108,12 +108,16 @@ class MainApp
 
     initializeEnv() {
         const defaults = {
+            year: new Date().getFullYear().toString(),
             clean: true,
             zip: true,
         }
         this.envFile = this.getConfigFile(dotEnv);
         if (fs.existsSync(this.envFile)) {
             this.env = JSON.parse(fs.readFileSync(this.envFile));
+            if (this.env.year === undefined) {
+                this.env.year = defaults.year;
+            }
         } else {
             this.env = defaults;
         }
@@ -206,13 +210,15 @@ class MainApp
         const file = this.getAgrConf();
         if (fs.existsSync(file)) {
             res = this.getConfigFile('.agr');
-            const conf = JSON.parse(fs.readFileSync(file));
-            const year = conf.year || new Date().getFullYear();
+            const conf = {
+                year: this.env.year,
+                ...JSON.parse(fs.readFileSync(file)),
+            }
             fs.writeFileSync(res, JSON.stringify({
                 ...conf,
                 autoClose: true,
                 workdir: this.config.outdir,
-                dir: path.join(this.config.outdir, year.toString(), path.sep),
+                dir: path.join(this.config.outdir, conf.year.toString(), path.sep),
             }));
         }
         return res;

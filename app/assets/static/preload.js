@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2025-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -73,20 +73,31 @@ contextBridge.exposeInMainWorld('electronAPI', {
         const nodes = document.querySelectorAll(`[${keyName}]`);
         if (nodes.length) {
             const val = (node, value) => {
-                let res;
+                let res, isCheckbox = false, isSelect = false;
                 if (node.nodeName === 'INPUT') {
                     const itype = node.attributes.getNamedItem('type');
                     if (itype && itype.nodeValue.toLowerCase() === 'checkbox') {
-                        if (value !== undefined && node.checked !== value) {
-                            node.checked = value;
-                        }
-                        res = node.checked;
-                    } else {
-                        if (value !== undefined) {
-                            node.nodeValue = value;
-                        }
-                        res = node.nodeValue;
+                        isCheckbox = true;
                     }
+                }
+                if (node.nodeName === 'SELECT') {
+                    isSelect = true;
+                }
+                if (isCheckbox) {
+                    if (value !== undefined && node.checked !== value) {
+                        node.checked = value;
+                    }
+                    res = node.checked;
+                } else if (isSelect) {
+                    if (value !== undefined) {
+                        node.value = value;
+                    }
+                    res = node.value;
+                } else {
+                    if (value !== undefined) {
+                        node.nodeValue = value;
+                    }
+                    res = node.nodeValue;
                 }
                 return res;
             }
