@@ -25,22 +25,23 @@
 const IpcCore = require('./~core');
 const { BrowserWindow } = require('electron');
 
-class OpenLog extends IpcCore {
+class ConfigHelp extends IpcCore {
 
     async handle(data, res) {
         const parent = BrowserWindow.fromWebContents(this.webContents);
-        data.url = this.parent.getStatic('log', 'log.html');
+        data.url = this.parent.getStatic('app', 'config.html');
         await this.createWin('log', {
             ...data,
             parent,
             options: {
+                title: this.parent.translate('Application Configuration Help'),
                 minimizable: false,
                 maximizable: false,
-                width: 600,
-                height: 400,
+                width: 800,
+                height: 500,
             },
         });
     }
 }
 
-module.exports = OpenLog;
+module.exports = ConfigHelp;

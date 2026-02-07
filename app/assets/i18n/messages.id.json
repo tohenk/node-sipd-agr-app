@@ -118,5 +118,45 @@
   [
     "Budgeting Year",
     "Tahun Anggaran"
+  ],
+  [
+    "Show configuration help",
+    "Lihat bantuan konfigurasi"
+  ],
+  [
+    "?",
+    "?"
+  ],
+  [
+    " ? ",
+    " ? "
+  ],
+  [
+    "Application Configuration Help",
+    "Bantuan Konfigurasi Aplikasi"
+  ],
+  [
+    "Application configuration is using JSON format, it mainly used to provides SIPD RI credential. Each field must be replaced with your actual credential.",
+    "Konfigurasi aplikasi menggunakan format JSON, tujuan utamanya untuk menyediakan kredensial SIPD RI. Setiap item harus diisi dengan kredensial aktual yang anda miliki."
+  ],
+  [
+    "The default is shown as follow:",
+    "Konfigurasi baku seperti ditunjukkan berikut ini:"
+  ],
+  [
+    "The following additional configuration is recognized and will be applied while downloading the budgeting:",
+    "Konfigurasi tambahan berikut ini dikenali dan akan diaplikasikan pada saat mengunduh anggaran:"
+  ],
+  [
+    "The value can be a string or array of string which contains dotted code of corresponding configuration key. Only budgeting with matching value will be downloaded, to exclude the budgeting prefix value with ‐.",
+    "Nilai berupa string atau array string yang berisi kode bertitik setiap kunci konfigurasi yang terkait. Hanya anggaran dengan nilai kunci yang cocok yang akan diunduh, untuk mengabaikan anggaran tertentu awali nilai kunci dengan ‐."
+  ],
+  [
+    "The following configuration shows how to only downloading specific budgeting:",
+    "Konfigurasi berikut menunjukkan bagaimana untuk mengunduh hanya anggaran tertentu:"
+  ],
+  [
+    "The following configuration shows how to skip downloading specific budgeting:",
+    "Konfigurasi berikut menunjukkan bagaimana untuk mengabaikan mengunduh anggaran tertentu:"
   ]
 ]
